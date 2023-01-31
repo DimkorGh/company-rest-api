@@ -2,32 +2,35 @@ package server
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	httpServer *http.Server
+	ctx        context.Context
+	HttpServer *http.Server
 }
 
-func NewServer(httpServer *http.Server) *Server {
+func NewServer(ctx context.Context, httpServer *http.Server) *Server {
 	return &Server{
-		httpServer: httpServer,
+		ctx:        ctx,
+		HttpServer: httpServer,
 	}
 }
 
-func (server *Server) Start(wg *sync.WaitGroup, closeServerChan <-chan bool) {
+func (srv *Server) Start(wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	go func() {
-		if err := server.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.HttpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logrus.Fatalf("Error from http server: %s", err.Error())
 		}
 	}()
 
-	select {
-	case <-closeServerChan:
+	<-srv.ctx.Done()
+	if err := srv.HttpServer.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("Error while closing http server: %s", err.Error())
 	}
-
-	server.httpServer.Shutdown(context.Background())
-	wg.Done()
 }

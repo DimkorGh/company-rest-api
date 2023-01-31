@@ -2,34 +2,34 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"xmAssesment/internal/core/auth"
-	"xmAssesment/internal/core/injector"
+
+	"company-rest-api/internal/company/delivery"
+	"company-rest-api/internal/core/auth"
 )
 
 type HttpHandler struct {
-	Router        *mux.Router
-	injector      *injector.Injector
-	authenticator *auth.Authenticator
+	Router      *mux.Router
+	auth        *auth.Authenticator
+	compHandler delivery.CompanyHandlerInt
 }
 
 func NewHttpHandler(
 	router *mux.Router,
-	injector *injector.Injector,
-	authenticator *auth.Authenticator,
+	auth *auth.Authenticator,
+	compHandler delivery.CompanyHandlerInt,
 ) *HttpHandler {
 	return &HttpHandler{
-		Router:        router,
-		injector:      injector,
-		authenticator: authenticator,
+		Router:      router,
+		auth:        auth,
+		compHandler: compHandler,
 	}
 }
 
-func (httpHandler *HttpHandler) InitializeRouter() {
-	httpHandler.injector.InitializeDependencies()
+func (h *HttpHandler) InitializeRouter() {
+	h.Router.HandleFunc("/token", h.auth.GenerateToken).Methods("GET")
 
-	httpHandler.Router.HandleFunc("/token", httpHandler.authenticator.GenerateToken).Methods("GET")
-	httpHandler.Router.HandleFunc("/company", httpHandler.authenticator.Authenticate(httpHandler.injector.CompanyPostHandler.CreateCompany)).Methods("POST")
-	httpHandler.Router.HandleFunc("/company", httpHandler.injector.CompanyGetHandler.GetCompany).Methods("GET")
-	httpHandler.Router.HandleFunc("/company", httpHandler.authenticator.Authenticate(httpHandler.injector.CompanyUpdateHandler.UpdateCompany)).Methods("PATCH")
-	httpHandler.Router.HandleFunc("/company", httpHandler.authenticator.Authenticate(httpHandler.injector.CompanyDeleteHandler.DeleteCompany)).Methods("DELETE")
+	h.Router.HandleFunc("/company", h.compHandler.GetCompany).Methods("GET")
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.CreateCompany)).Methods("POST")
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.UpdateCompany)).Methods("PATCH")
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.DeleteCompany)).Methods("DELETE")
 }

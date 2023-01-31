@@ -1,10 +1,11 @@
 package env
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Environment struct {
@@ -14,14 +15,14 @@ func NewEnvironment() *Environment {
 	return &Environment{}
 }
 
-func (environment *Environment) Initialize() {
+func (env *Environment) Initialize() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error while initializing .env file: %s", err.Error())
 	}
 }
 
-func (environment *Environment) InitializeTestEnv() {
+func (env *Environment) InitializeTestEnv() {
 	path, _ := os.Getwd()
 
 	for {
@@ -30,7 +31,6 @@ func (environment *Environment) InitializeTestEnv() {
 			lastSlash := strings.LastIndex(path, "/")
 			if lastSlash == -1 {
 				log.Fatal()
-				break
 			}
 			path = path[:lastSlash]
 

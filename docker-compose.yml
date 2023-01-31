@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  api:
+    restart: always
+    build: .
+    ports:
+      - "8090:8090"
+    depends_on:
+      - mongo
+      - kafka
+  mongo:
+    image: "mongo:6.0.2"
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: api-db
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+    volumes:
+      - ./migrations/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+  kafka:
+    image: "bitnami/kafka:3.3.2"
+    restart: always
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.17.0.1:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+  zookeeper:
+    image: 'zookeeper:3.6.4'
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes

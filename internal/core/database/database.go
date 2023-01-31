@@ -2,13 +2,14 @@ package database
 
 import (
 	"context"
+	"log"
+	"os"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"os"
-	"time"
 )
 
 type DatabaseInt interface {
@@ -20,25 +21,25 @@ type DatabaseInt interface {
 }
 
 type Database struct {
+	ctx          context.Context
 	client       *mongo.Client
 	databaseName string
-	ctx          context.Context
 }
 
-func NewDatabase(databaseName string, ctx context.Context) *Database {
+func NewDatabase(ctx context.Context, databaseName string) *Database {
 	return &Database{
-		databaseName: databaseName,
 		ctx:          ctx,
+		databaseName: databaseName,
 	}
 }
 
-func (database *Database) Connect() {
+func (db *Database) Connect() {
 	go func() {
-		<-database.ctx.Done()
-		database.disconnect()
+		<-db.ctx.Done()
+		db.disconnect()
 	}()
 
-	ctx, cancel := context.WithTimeout(database.ctx, 2*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 5*time.Second)
 	defer cancel()
 
 	clientOptions := options.Client().
@@ -52,32 +53,32 @@ func (database *Database) Connect() {
 	if err != nil {
 		log.Fatalf("Error while connecting to db: %s", err.Error())
 	}
-	database.client = client
+	db.client = client
 
-	err = database.client.Ping(ctx, nil)
+	err = db.client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatalf("Error while pinging to db: %s", err.Error())
 	}
 }
 
-func (database *Database) disconnect() {
-	if database.client == nil {
+func (db *Database) disconnect() {
+	if db.client == nil {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(database.ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
 
-	err := database.client.Disconnect(ctx)
+	err := db.client.Disconnect(ctx)
 	if err != nil {
 		logrus.Fatalf("Error while disconnecting from db %s", err.Error())
 	}
 }
 
-func (database *Database) InsertOne(collectionName string, data interface{}) error {
-	coll := database.client.Database(database.databaseName).Collection(collectionName)
+func (db *Database) InsertOne(collectionName string, data interface{}) error {
+	coll := db.client.Database(db.databaseName).Collection(collectionName)
 
-	ctx, cancel := context.WithTimeout(database.ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
 
 	_, err := coll.InsertOne(ctx, data)
@@ -93,10 +94,10 @@ func (database *Database) InsertOne(collectionName string, data interface{}) err
 	return nil
 }
 
-func (database *Database) FindOne(collectionName string, filter bson.D, data interface{}) error {
-	coll := database.client.Database(database.databaseName).Collection(collectionName)
+func (db *Database) FindOne(collectionName string, filter bson.D, data interface{}) error {
+	coll := db.client.Database(db.databaseName).Collection(collectionName)
 
-	ctx, cancel := context.WithTimeout(database.ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
 
 	err := coll.FindOne(ctx, filter).Decode(data)
@@ -112,10 +113,10 @@ func (database *Database) FindOne(collectionName string, filter bson.D, data int
 	return nil
 }
 
-func (database *Database) UpdateOne(collectionName string, filter bson.M, data interface{}) error {
-	coll := database.client.Database(database.databaseName).Collection(collectionName)
+func (db *Database) UpdateOne(collectionName string, filter bson.M, data interface{}) error {
+	coll := db.client.Database(db.databaseName).Collection(collectionName)
 
-	ctx, cancel := context.WithTimeout(database.ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
 
 	result, err := coll.UpdateOne(ctx, filter, data)
@@ -134,10 +135,10 @@ func (database *Database) UpdateOne(collectionName string, filter bson.M, data i
 	return nil
 }
 
-func (database *Database) DeleteOne(collectionName string, filter bson.D) error {
-	coll := database.client.Database(database.databaseName).Collection(collectionName)
+func (db *Database) DeleteOne(collectionName string, filter bson.D) error {
+	coll := db.client.Database(db.databaseName).Collection(collectionName)
 
-	ctx, cancel := context.WithTimeout(database.ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
 
 	result, err := coll.DeleteOne(ctx, filter)
@@ -157,22 +158,22 @@ type DatabaseError struct {
 	errorMessage string
 }
 
-func (databaseError *DatabaseError) Error() string {
-	return databaseError.errorMessage
+func (dbe *DatabaseError) Error() string {
+	return dbe.errorMessage
 }
 
 type NoDocumentsFoundError struct {
 	errorMessage string
 }
 
-func (noDocumentsFoundError *NoDocumentsFoundError) Error() string {
-	return noDocumentsFoundError.errorMessage
+func (nde *NoDocumentsFoundError) Error() string {
+	return nde.errorMessage
 }
 
 type DuplicateKeyError struct {
 	errorMessage string
 }
 
-func (duplicateKeyError *DuplicateKeyError) Error() string {
-	return duplicateKeyError.errorMessage
+func (dke *DuplicateKeyError) Error() string {
+	return dke.errorMessage
 }

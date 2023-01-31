@@ -1,0 +1,15 @@
+[
+  {
+    "insert": "company",
+    "documents": [
+      {
+        "_id": "40ed576f-e56d-4867-aca3-ac1f30cc1409",
+        "name": "randomCompanyName",
+        "description": "randomDescription",
+        "amount": 21,
+        "registered": true,
+        "type": "Corporations"
+      }
+    ]
+  }
+]

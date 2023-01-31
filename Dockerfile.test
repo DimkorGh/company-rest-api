@@ -1,0 +1,26 @@
+FROM golang:1.19.5-alpine3.17 as builder
+
+RUN apk update
+RUN apk add build-base
+
+WORKDIR /app
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+RUN go install github.com/golang/mock/mockgen@v1.6.0
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+RUN go get gopkg.in/confluentinc/confluent-kafka-go.v1/kafka
+
+COPY . .
+
+FROM golang:1.19.5-alpine3.17
+
+RUN apk update
+RUN apk add build-base bash librdkafka musl
+
+COPY --from=builder /go /go
+
+WORKDIR /app
+
+COPY . .
