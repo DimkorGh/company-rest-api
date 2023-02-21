@@ -41,7 +41,7 @@ func NewCompanyRepository(database database.DatabaseInt) *CompanyRepository {
 }
 
 func (cr *CompanyRepository) GetCompany(companyId string) (*CompanyDocument, error) {
-	filter := bson.D{{"_id", companyId}}
+	filter := bson.D{{Key: "_id", Value: companyId}}
 
 	companyDoc := &CompanyDocument{}
 
@@ -92,7 +92,7 @@ func (cr *CompanyRepository) UpdateCompany(companyEntity *model.CompanyEntity) e
 }
 
 func (cr *CompanyRepository) DeleteCompany(companyId string) error {
-	filter := bson.D{{"_id", companyId}}
+	filter := bson.D{{Key: "_id", Value: companyId}}
 
 	err := cr.database.DeleteOne(companyCollection, filter)
 	if err != nil {

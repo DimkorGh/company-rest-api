@@ -1,12 +1,13 @@
-name: Xm assessment API linter
+name: Linter
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
 permissions:
   contents: read
 jobs:
-  linter:
+  golangci:
     name: linter
     runs-on: ubuntu-latest
     steps:
@@ -18,4 +19,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.29
+          version: latest

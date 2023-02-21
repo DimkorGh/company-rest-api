@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -19,10 +20,16 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"company-rest-api/internal/company/delivery"
+	"company-rest-api/internal/company/repository"
+	"company-rest-api/internal/company/service"
 	"company-rest-api/internal/core/auth"
-	"company-rest-api/internal/core/dependencies"
+	"company-rest-api/internal/core/database"
 	"company-rest-api/internal/core/env"
+	"company-rest-api/internal/core/eventProducer"
 	"company-rest-api/internal/core/router"
+	"company-rest-api/internal/utils/parser"
+	"company-rest-api/internal/utils/response"
+	"company-rest-api/internal/utils/validators"
 	"company-rest-api/mocks"
 )
 
@@ -95,11 +102,11 @@ func TestGetCompany(t *testing.T) {
 			initializeTestEnv()
 
 			m := getMigration()
-			m.Up()
+			_ = m.Up()
 
 			createTestEndpoint(tt.args.w, tt.args.r)
 
-			m.Down()
+			_ = m.Down()
 
 			assert.Equal(t, tt.expectedStatusCode, tt.args.w.Code)
 			assert.JSONEq(t, tt.expectedBody, tt.args.w.Body.String())
@@ -335,7 +342,6 @@ func TestUpdateCompany(t *testing.T) {
 
 	type req struct {
 		method  string
-		uri     string
 		body    string
 		headers http.Header
 	}
@@ -492,11 +498,11 @@ func TestUpdateCompany(t *testing.T) {
 			testReq.Body = io.NopCloser(strings.NewReader(tt.args.r.body))
 
 			m := getMigration()
-			m.Up()
+			_ = m.Up()
 
 			createTestEndpoint(tt.args.w, testReq)
 
-			m.Down()
+			_ = m.Down()
 
 			assert.Equal(t, tt.expectedStatusCode, tt.args.w.Code)
 			assert.Equal(t, tt.expectedBody, tt.args.w.Body.String())
@@ -588,11 +594,11 @@ func TestDeleteCompany(t *testing.T) {
 			testReq.Header = tt.args.r.headers
 
 			m := getMigration()
-			m.Up()
+			_ = m.Up()
 
 			createTestEndpoint(tt.args.w, testReq)
 
-			m.Down()
+			_ = m.Down()
 
 			assert.Equal(t, tt.expectedStatusCode, tt.args.w.Code)
 			assert.Equal(t, tt.expectedBody, tt.args.w.Body.String())
@@ -601,11 +607,27 @@ func TestDeleteCompany(t *testing.T) {
 }
 
 func createTestEndpoint(w *httptest.ResponseRecorder, r *http.Request) {
-	testRouter := router.NewHttpHandler(
-		mux.NewRouter(),
-		dependencies.NewContainer(context.Background()),
-		auth.NewAuthenticator(mockSecretKey),
-	)
+	muxRouter := mux.NewRouter()
+	authMiddleware := auth.NewAuthenticator(mockSecretKey)
+
+	db := database.NewDatabase(context.Background(), os.Getenv("DATABASE_NAME"))
+	db.Connect()
+
+	eventProd := eventProducer.NewEventProducer()
+	eventProd.Initialize()
+
+	goValidator := validator.New()
+
+	structValidator := validators.NewStructValidator(goValidator)
+	respBuilder := response.NewResponseBuilder()
+	jsonParser := parser.NewJsonParser(structValidator)
+	urlParParser := parser.NewUrlParamsParser(structValidator)
+
+	compRepo := repository.NewCompanyRepository(db)
+	compService := service.NewCompanyService(compRepo, eventProd)
+	companyHandler := delivery.NewCompanyHandler(jsonParser, urlParParser, respBuilder, compService)
+
+	testRouter := router.NewHttpHandler(muxRouter, authMiddleware, companyHandler)
 	testRouter.InitializeRouter()
 
 	testRouter.Router.ServeHTTP(w, r)
