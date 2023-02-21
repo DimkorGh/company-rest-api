@@ -1,10 +1,11 @@
 package service_test
 
 import (
-	"company-rest-api/internal/company/repository"
-	"company-rest-api/internal/company/service"
 	"errors"
 	"testing"
+
+	"company-rest-api/internal/company/repository"
+	"company-rest-api/internal/company/service"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"

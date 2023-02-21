@@ -25,7 +25,8 @@ func (ep *EventProducer) Initialize() {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": os.Getenv("KAFKA_ADDRESS"),
 		"client.id":         os.Getenv("KAFKA_CLIENT"),
-		"acks":              "all"},
+		"acks":              "all",
+	},
 	)
 	if err != nil {
 		log.Fatalf("Failed to create event producer: %s", err.Error())
@@ -38,13 +39,15 @@ func (ep *EventProducer) Produce(message []byte, topic string) {
 	deliveryChan := make(chan kafka.Event, 10000)
 	err := ep.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          message},
+		Value:          message,
+	},
 		deliveryChan,
 	)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"topic": topic,
 		}).Errorf("Error while producing event: %s", err.Error())
+
 		return
 	}
 

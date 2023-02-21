@@ -70,13 +70,15 @@ func (cr *CompanyRepository) UpdateCompany(companyEntity *model.CompanyEntity) e
 	marshalledDomainData, err := json.Marshal(&companyEntity)
 	if err != nil {
 		logrus.Errorf("Error while marshalling company update domain data to json: %s", err.Error())
+
 		return errors.New("internal error")
 	}
 
 	companyDoc := CompanyDocument{}
-	err = json.Unmarshal([]byte(marshalledDomainData), &companyDoc)
+	err = json.Unmarshal(marshalledDomainData, &companyDoc)
 	if err != nil {
 		logrus.Errorf("Error while unmarshalling company update domain data json to company doc: %s", err.Error())
+
 		return errors.New("internal error")
 	}
 

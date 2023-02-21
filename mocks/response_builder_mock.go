@@ -1,9 +1,10 @@
 package mocks
 
 import (
-	"github.com/golang/mock/gomock"
 	"net/http"
 	"reflect"
+
+	"github.com/golang/mock/gomock"
 )
 
 // MockResponseBuilderInt is a mock of ResponseBuilderInt interface.

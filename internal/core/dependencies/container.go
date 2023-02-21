@@ -2,10 +2,10 @@ package dependencies
 
 import (
 	"context"
-	"github.com/gorilla/mux"
 	"os"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 
 	"company-rest-api/internal/company/delivery"
 	"company-rest-api/internal/company/repository"

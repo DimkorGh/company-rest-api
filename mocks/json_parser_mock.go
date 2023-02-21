@@ -1,9 +1,10 @@
 package mocks
 
 import (
-	"github.com/golang/mock/gomock"
 	"net/http"
 	"reflect"
+
+	"github.com/golang/mock/gomock"
 )
 
 // MockJsonParserInt is a mock of JsonParserInt interface.

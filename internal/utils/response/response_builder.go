@@ -15,8 +15,7 @@ type ResponseBuilderInt interface {
 	SendResponse(w http.ResponseWriter, body interface{}, err error)
 }
 
-type ResponseBuilder struct {
-}
+type ResponseBuilder struct{}
 
 func NewResponseBuilder() *ResponseBuilder {
 	return &ResponseBuilder{}

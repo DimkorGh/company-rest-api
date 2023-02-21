@@ -1,13 +1,14 @@
 package parser
 
 import (
-	"company-rest-api/internal/utils/validators"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
+
+	"company-rest-api/internal/utils/validators"
 )
 
 func TestParseUrlParams(t *testing.T) {

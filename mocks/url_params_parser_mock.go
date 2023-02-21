@@ -1,9 +1,10 @@
 package mocks
 
 import (
-	"github.com/golang/mock/gomock"
 	"net/http"
 	"reflect"
+
+	"github.com/golang/mock/gomock"
 )
 
 // MockUrlParamsParserInt is a mock of UrlParamsParserInt interface.

@@ -1,9 +1,10 @@
 package mocks
 
 import (
+	"reflect"
+
 	"github.com/golang/mock/gomock"
 	"go.mongodb.org/mongo-driver/bson"
-	"reflect"
 )
 
 // MockDatabaseInt is a mock of DatabaseInt interface.

@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -102,11 +103,12 @@ func (db *Database) FindOne(collectionName string, filter bson.D, data interface
 
 	err := coll.FindOne(ctx, filter).Decode(data)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return &NoDocumentsFoundError{errorMessage: err.Error()}
 		}
 
 		logrus.Errorf("Error while retrieving from db: %s", err.Error())
+
 		return &DatabaseError{errorMessage: "Database error"}
 	}
 
@@ -144,6 +146,7 @@ func (db *Database) DeleteOne(collectionName string, filter bson.D) error {
 	result, err := coll.DeleteOne(ctx, filter)
 	if err != nil {
 		logrus.Errorf("Error while deleting from db: %s", err.Error())
+
 		return &DatabaseError{errorMessage: "Database error"}
 	}
 

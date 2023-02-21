@@ -8,8 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Environment struct {
-}
+type Environment struct{}
 
 func NewEnvironment() *Environment {
 	return &Environment{}

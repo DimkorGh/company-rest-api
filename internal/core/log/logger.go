@@ -7,8 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Logger struct {
-}
+type Logger struct{}
 
 func NewLogger() *Logger {
 	return &Logger{}

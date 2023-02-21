@@ -1,8 +1,9 @@
 package mocks
 
 import (
-	"github.com/golang/mock/gomock"
 	"reflect"
+
+	"github.com/golang/mock/gomock"
 )
 
 // MockEventProducerInt is a mock of EventProducerInt interface.

@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"company-rest-api/internal/core/dependencies"
 	"company-rest-api/internal/core/server"
@@ -25,8 +26,9 @@ func main() {
 	wg.Add(1)
 
 	httpServer := &http.Server{
-		Addr:    ":" + os.Getenv("API_PORT"),
-		Handler: depContainer.HttpHandler.Router,
+		Addr:              ":" + os.Getenv("API_PORT"),
+		Handler:           depContainer.HttpHandler.Router,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 	srv := server.NewServer(ctx, httpServer)
 

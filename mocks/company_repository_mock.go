@@ -1,10 +1,11 @@
 package mocks
 
 import (
+	"reflect"
+
 	"company-rest-api/internal/company/model"
 	"company-rest-api/internal/company/repository"
 	"github.com/golang/mock/gomock"
-	"reflect"
 )
 
 // MockCompanyRepositoryInt is a mock of CompanyRepositoryInt interface.
