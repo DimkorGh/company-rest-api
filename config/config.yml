@@ -1,0 +1,20 @@
+server:
+  Port: :8090
+  Mode: development
+  JwtSecretKey: 466b525d-128d-4a52-83ae-8966fc9e6b1d
+  ReadHeaderTimeout: 2
+
+logger:
+  Encoding: json
+  Level: 2
+
+database:
+  Address: 172.17.0.1:27017
+  Username: user
+  Password: pass
+  DbName: api-db
+  MigrationsPath: file://../../../migrations
+
+kafka:
+  Address: 172.17.0.1:9092
+  Client: company-api

@@ -11,6 +11,7 @@ import (
 	"company-rest-api/internal/company/repository"
 	"company-rest-api/internal/company/service"
 	"company-rest-api/internal/core/auth"
+	"company-rest-api/internal/core/config"
 	"company-rest-api/internal/core/database"
 	"company-rest-api/internal/core/env"
 	"company-rest-api/internal/core/eventProducer"
@@ -23,6 +24,7 @@ import (
 
 type Container struct {
 	ctx         context.Context
+	Conf        *config.Config
 	HttpHandler *router.HttpHandler
 }
 
@@ -34,16 +36,18 @@ func NewContainer(ctx context.Context) *Container {
 
 func (c *Container) Initialize() {
 	env.NewEnvironment().Initialize()
-	log.NewLogger().Initialize()
+	c.Conf = config.NewConfig().Load(os.Getenv("CONFIG_NAME"), os.Getenv("CONFIG_PATH"))
 
-	db := database.NewDatabase(c.ctx, os.Getenv("DATABASE_NAME"))
+	log.NewLogger(c.Conf).Initialize()
+
+	db := database.NewDatabase(c.ctx, c.Conf)
 	db.Connect()
 
-	eventProd := eventProducer.NewEventProducer()
+	eventProd := eventProducer.NewEventProducer(c.Conf)
 	eventProd.Initialize()
 
 	goValidator := validator.New()
-	authMiddleware := auth.NewAuthenticator(os.Getenv("API_SECRET"))
+	authMiddleware := auth.NewAuthenticator(c.Conf.Server.JwtSecretKey)
 	muxRouter := mux.NewRouter()
 
 	structValidator := validators.NewStructValidator(goValidator)

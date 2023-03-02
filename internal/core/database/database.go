@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"log"
-	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"company-rest-api/internal/core/config"
 )
 
 type DatabaseInt interface {
@@ -22,15 +23,15 @@ type DatabaseInt interface {
 }
 
 type Database struct {
-	ctx          context.Context
-	client       *mongo.Client
-	databaseName string
+	ctx    context.Context
+	client *mongo.Client
+	cnf    *config.Config
 }
 
-func NewDatabase(ctx context.Context, databaseName string) *Database {
+func NewDatabase(ctx context.Context, cnf *config.Config) *Database {
 	return &Database{
-		ctx:          ctx,
-		databaseName: databaseName,
+		ctx: ctx,
+		cnf: cnf,
 	}
 }
 
@@ -46,9 +47,9 @@ func (db *Database) Connect() {
 	clientOptions := options.Client().
 		ApplyURI(
 			"mongodb://" +
-				os.Getenv("MONGO_USERNAME") + ":" +
-				os.Getenv("MONGO_PASSWORD") + "@" +
-				os.Getenv("MONGO_ADDRESS"))
+				db.cnf.Database.Username + ":" +
+				db.cnf.Database.Password + "@" +
+				db.cnf.Database.Address)
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -77,7 +78,7 @@ func (db *Database) disconnect() {
 }
 
 func (db *Database) InsertOne(collectionName string, data interface{}) error {
-	coll := db.client.Database(db.databaseName).Collection(collectionName)
+	coll := db.client.Database(db.cnf.Database.DbName).Collection(collectionName)
 
 	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
@@ -96,7 +97,7 @@ func (db *Database) InsertOne(collectionName string, data interface{}) error {
 }
 
 func (db *Database) FindOne(collectionName string, filter bson.D, data interface{}) error {
-	coll := db.client.Database(db.databaseName).Collection(collectionName)
+	coll := db.client.Database(db.cnf.Database.DbName).Collection(collectionName)
 
 	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
@@ -116,7 +117,7 @@ func (db *Database) FindOne(collectionName string, filter bson.D, data interface
 }
 
 func (db *Database) UpdateOne(collectionName string, filter bson.M, data interface{}) error {
-	coll := db.client.Database(db.databaseName).Collection(collectionName)
+	coll := db.client.Database(db.cnf.Database.DbName).Collection(collectionName)
 
 	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()
@@ -138,7 +139,7 @@ func (db *Database) UpdateOne(collectionName string, filter bson.M, data interfa
 }
 
 func (db *Database) DeleteOne(collectionName string, filter bson.D) error {
-	coll := db.client.Database(db.databaseName).Collection(collectionName)
+	coll := db.client.Database(db.cnf.Database.DbName).Collection(collectionName)
 
 	ctx, cancel := context.WithTimeout(db.ctx, 1*time.Second)
 	defer cancel()

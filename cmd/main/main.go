@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"company-rest-api/internal/core/dependencies"
 	"company-rest-api/internal/core/server"
@@ -19,16 +18,16 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	depContainer := dependencies.NewContainer(ctx)
-	depContainer.Initialize()
+	dp := dependencies.NewContainer(ctx)
+	dp.Initialize()
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
 	httpServer := &http.Server{
-		Addr:              ":" + os.Getenv("API_PORT"),
-		Handler:           depContainer.HttpHandler.Router,
-		ReadHeaderTimeout: 2 * time.Second,
+		Addr:              dp.Conf.Server.Port,
+		Handler:           dp.HttpHandler.Router,
+		ReadHeaderTimeout: dp.Conf.Server.ReadHeaderTimeout,
 	}
 	srv := server.NewServer(ctx, httpServer)
 

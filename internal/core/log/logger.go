@@ -1,16 +1,20 @@
 package log
 
 import (
-	"os"
+	"company-rest-api/internal/core/config"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
 
-type Logger struct{}
+type Logger struct {
+	cnf *config.Config
+}
 
-func NewLogger() *Logger {
-	return &Logger{}
+func NewLogger(cnf *config.Config) *Logger {
+	return &Logger{
+		cnf: cnf,
+	}
 }
 
 func (lgr *Logger) Initialize() {
@@ -18,7 +22,7 @@ func (lgr *Logger) Initialize() {
 	log.SetFormatter(&logrus.JSONFormatter{})
 	log.SetReportCaller(true)
 
-	logLevel, err := strconv.Atoi(os.Getenv("ERROR_LEVEL"))
+	logLevel, err := strconv.Atoi(lgr.cnf.Logger.Level)
 	if err != nil {
 		log.Fatalf("Error while converting log level to int %s", err.Error())
 	}

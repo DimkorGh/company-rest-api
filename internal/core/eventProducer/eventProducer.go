@@ -1,8 +1,8 @@
 package eventProducer
 
 import (
+	"company-rest-api/internal/core/config"
 	"log"
-	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/sirupsen/logrus"
@@ -15,16 +15,19 @@ type EventProducerInt interface {
 
 type EventProducer struct {
 	producer *kafka.Producer
+	cnf      *config.Config
 }
 
-func NewEventProducer() *EventProducer {
-	return &EventProducer{}
+func NewEventProducer(cnf *config.Config) *EventProducer {
+	return &EventProducer{
+		cnf: cnf,
+	}
 }
 
 func (ep *EventProducer) Initialize() {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": os.Getenv("KAFKA_ADDRESS"),
-		"client.id":         os.Getenv("KAFKA_CLIENT"),
+		"bootstrap.servers": ep.cnf.Kafka.Address,
+		"client.id":         ep.cnf.Kafka.Client,
 		"acks":              "all",
 	},
 	)

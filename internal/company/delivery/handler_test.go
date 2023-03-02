@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -23,6 +22,7 @@ import (
 	"company-rest-api/internal/company/repository"
 	"company-rest-api/internal/company/service"
 	"company-rest-api/internal/core/auth"
+	"company-rest-api/internal/core/config"
 	"company-rest-api/internal/core/database"
 	"company-rest-api/internal/core/env"
 	"company-rest-api/internal/core/eventProducer"
@@ -99,12 +99,12 @@ func TestGetCompany(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			initializeTestEnv()
+			cnf := initializeTestConfig()
 
-			m := getMigration()
+			m := getMigration(cnf)
 			_ = m.Up()
 
-			createTestEndpoint(tt.args.w, tt.args.r)
+			createTestEndpoint(cnf, tt.args.w, tt.args.r)
 
 			_ = m.Down()
 
@@ -322,13 +322,13 @@ func TestCreateCompany(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			initializeTestEnv()
+			cnf := initializeTestConfig()
 
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri, nil)
 			testReq.Header = tt.args.r.headers
 			testReq.Body = io.NopCloser(strings.NewReader(tt.args.r.body))
 
-			createTestEndpoint(tt.args.w, testReq)
+			createTestEndpoint(cnf, tt.args.w, testReq)
 
 			assert.Equal(t, tt.expectedStatusCode, tt.args.w.Code)
 			assert.Contains(t, tt.args.w.Body.String(), tt.expectedBody)
@@ -491,16 +491,16 @@ func TestUpdateCompany(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			initializeTestEnv()
+			cnf := initializeTestConfig()
 
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri, nil)
 			testReq.Header = tt.args.r.headers
 			testReq.Body = io.NopCloser(strings.NewReader(tt.args.r.body))
 
-			m := getMigration()
+			m := getMigration(cnf)
 			_ = m.Up()
 
-			createTestEndpoint(tt.args.w, testReq)
+			createTestEndpoint(cnf, tt.args.w, testReq)
 
 			_ = m.Down()
 
@@ -588,15 +588,15 @@ func TestDeleteCompany(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			initializeTestEnv()
+			cnf := initializeTestConfig()
 
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri+tt.args.r.uri, nil)
 			testReq.Header = tt.args.r.headers
 
-			m := getMigration()
+			m := getMigration(cnf)
 			_ = m.Up()
 
-			createTestEndpoint(tt.args.w, testReq)
+			createTestEndpoint(cnf, tt.args.w, testReq)
 
 			_ = m.Down()
 
@@ -606,14 +606,14 @@ func TestDeleteCompany(t *testing.T) {
 	}
 }
 
-func createTestEndpoint(w *httptest.ResponseRecorder, r *http.Request) {
+func createTestEndpoint(cnf *config.Config, w *httptest.ResponseRecorder, r *http.Request) {
 	muxRouter := mux.NewRouter()
 	authMiddleware := auth.NewAuthenticator(mockSecretKey)
 
-	db := database.NewDatabase(context.Background(), os.Getenv("DATABASE_NAME"))
+	db := database.NewDatabase(context.Background(), cnf)
 	db.Connect()
 
-	eventProd := eventProducer.NewEventProducer()
+	eventProd := eventProducer.NewEventProducer(cnf)
 	eventProd.Initialize()
 
 	goValidator := validator.New()
@@ -633,19 +633,21 @@ func createTestEndpoint(w *httptest.ResponseRecorder, r *http.Request) {
 	testRouter.Router.ServeHTTP(w, r)
 }
 
-func initializeTestEnv() {
+func initializeTestConfig() *config.Config {
 	environment := env.NewEnvironment()
 	environment.InitializeTestEnv()
+
+	return config.NewConfig().Load("config", "./../../../config/")
 }
 
-func getMigration() *migrate.Migrate {
+func getMigration(cnf *config.Config) *migrate.Migrate {
 	m, err := migrate.New(
-		"file://../../../migrations",
+		cnf.Database.MigrationsPath,
 		"mongodb://"+
-			os.Getenv("MONGO_USERNAME")+":"+
-			os.Getenv("MONGO_PASSWORD")+"@"+
-			os.Getenv("MONGO_ADDRESS")+"/"+
-			os.Getenv("DATABASE_NAME")+
+			cnf.Database.Username+":"+
+			cnf.Database.Password+"@"+
+			cnf.Database.Address+"/"+
+			cnf.Database.DbName+
 			"?authSource=admin",
 	)
 	if err != nil {
