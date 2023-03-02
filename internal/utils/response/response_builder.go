@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"company-rest-api/internal/core/database"
+	"company-rest-api/internal/core/log"
 	"company-rest-api/internal/utils/parser"
 	"company-rest-api/internal/utils/validators"
 )
@@ -15,10 +16,14 @@ type ResponseBuilderInt interface {
 	SendResponse(w http.ResponseWriter, body interface{}, err error)
 }
 
-type ResponseBuilder struct{}
+type ResponseBuilder struct {
+	logger log.LoggerInt
+}
 
-func NewResponseBuilder() *ResponseBuilder {
-	return &ResponseBuilder{}
+func NewResponseBuilder(logger log.LoggerInt) *ResponseBuilder {
+	return &ResponseBuilder{
+		logger: logger,
+	}
 }
 
 func (rb *ResponseBuilder) SendResponse(w http.ResponseWriter, body interface{}, err error) {
@@ -26,10 +31,12 @@ func (rb *ResponseBuilder) SendResponse(w http.ResponseWriter, body interface{},
 
 	err = rb.writeResponse(w, statusCode, body)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"body":       body,
-			"statusCode": statusCode,
-		}).Errorf("Error while writing response: %s", err.Error())
+		rb.logger.Errorw(
+			"Error while writing response",
+			zap.String("body", body.(string)),
+			zap.Int("statusCode", statusCode),
+			zap.String("error", err.Error()),
+		)
 	}
 }
 

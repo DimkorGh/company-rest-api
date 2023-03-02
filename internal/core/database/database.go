@@ -3,15 +3,14 @@ package database
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"company-rest-api/internal/core/config"
+	"company-rest-api/internal/core/log"
 )
 
 type DatabaseInt interface {
@@ -26,12 +25,14 @@ type Database struct {
 	ctx    context.Context
 	client *mongo.Client
 	cnf    *config.Config
+	logger log.LoggerInt
 }
 
-func NewDatabase(ctx context.Context, cnf *config.Config) *Database {
+func NewDatabase(ctx context.Context, cnf *config.Config, logger log.LoggerInt) *Database {
 	return &Database{
-		ctx: ctx,
-		cnf: cnf,
+		ctx:    ctx,
+		cnf:    cnf,
+		logger: logger,
 	}
 }
 
@@ -53,13 +54,13 @@ func (db *Database) Connect() {
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatalf("Error while connecting to db: %s", err.Error())
+		db.logger.Fatalf("Error while connecting to db: %s", err.Error())
 	}
 	db.client = client
 
 	err = db.client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatalf("Error while pinging to db: %s", err.Error())
+		db.logger.Fatalf("Error while pinging to db: %s", err.Error())
 	}
 }
 
@@ -73,7 +74,7 @@ func (db *Database) disconnect() {
 
 	err := db.client.Disconnect(ctx)
 	if err != nil {
-		logrus.Fatalf("Error while disconnecting from db %s", err.Error())
+		db.logger.Fatalf("Error while disconnecting from db %s", err.Error())
 	}
 }
 
@@ -88,8 +89,8 @@ func (db *Database) InsertOne(collectionName string, data interface{}) error {
 		if mongo.IsDuplicateKeyError(err) {
 			return &DuplicateKeyError{errorMessage: err.Error()}
 		}
+		db.logger.Errorf("Error while inserting to db: %s", err.Error())
 
-		logrus.Errorf("Error while inserting to db: %s", err.Error())
 		return &DatabaseError{errorMessage: "Database error"}
 	}
 
@@ -107,8 +108,7 @@ func (db *Database) FindOne(collectionName string, filter bson.D, data interface
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return &NoDocumentsFoundError{errorMessage: err.Error()}
 		}
-
-		logrus.Errorf("Error while retrieving from db: %s", err.Error())
+		db.logger.Errorf("Error while retrieving from db: %s", err.Error())
 
 		return &DatabaseError{errorMessage: "Database error"}
 	}
@@ -124,7 +124,7 @@ func (db *Database) UpdateOne(collectionName string, filter bson.M, data interfa
 
 	result, err := coll.UpdateOne(ctx, filter, data)
 	if err != nil {
-		logrus.Errorf("Error while updating db document: %s", err.Error())
+		db.logger.Errorf("Error while updating db document: %s", err.Error())
 
 		return &DatabaseError{errorMessage: "Database error"}
 	}
@@ -146,7 +146,7 @@ func (db *Database) DeleteOne(collectionName string, filter bson.D) error {
 
 	result, err := coll.DeleteOne(ctx, filter)
 	if err != nil {
-		logrus.Errorf("Error while deleting from db: %s", err.Error())
+		db.logger.Errorf("Error while deleting from db: %s", err.Error())
 
 		return &DatabaseError{errorMessage: "Database error"}
 	}

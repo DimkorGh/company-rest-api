@@ -18,18 +18,18 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	dp := dependencies.NewContainer(ctx)
-	dp.Initialize()
+	dc := dependencies.NewContainer(ctx)
+	dc.Initialize()
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
 	httpServer := &http.Server{
-		Addr:              dp.Conf.Server.Port,
-		Handler:           dp.HttpHandler.Router,
-		ReadHeaderTimeout: dp.Conf.Server.ReadHeaderTimeout,
+		Addr:              dc.Conf.Server.Port,
+		Handler:           dc.HttpHandler.Router,
+		ReadHeaderTimeout: dc.Conf.Server.ReadHeaderTimeout,
 	}
-	srv := server.NewServer(ctx, httpServer)
+	srv := server.NewServer(ctx, dc.Logger, httpServer)
 
 	go srv.Start(wg)
 

@@ -1,11 +1,11 @@
 package eventProducer
 
 import (
-	"company-rest-api/internal/core/config"
-	"log"
-
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+
+	"company-rest-api/internal/core/config"
+	"company-rest-api/internal/core/log"
 )
 
 type EventProducerInt interface {
@@ -14,13 +14,15 @@ type EventProducerInt interface {
 }
 
 type EventProducer struct {
-	producer *kafka.Producer
 	cnf      *config.Config
+	logger   log.LoggerInt
+	producer *kafka.Producer
 }
 
-func NewEventProducer(cnf *config.Config) *EventProducer {
+func NewEventProducer(cnf *config.Config, logger log.LoggerInt) *EventProducer {
 	return &EventProducer{
-		cnf: cnf,
+		cnf:    cnf,
+		logger: logger,
 	}
 }
 
@@ -32,7 +34,7 @@ func (ep *EventProducer) Initialize() {
 	},
 	)
 	if err != nil {
-		log.Fatalf("Failed to create event producer: %s", err.Error())
+		ep.logger.Fatalf("Failed to create event producer: %s", err.Error())
 	}
 
 	ep.producer = producer
@@ -47,9 +49,11 @@ func (ep *EventProducer) Produce(message []byte, topic string) {
 		deliveryChan,
 	)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"topic": topic,
-		}).Errorf("Error while producing event: %s", err.Error())
+		ep.logger.Errorw(
+			"Error while producing event",
+			zap.String("topic", topic),
+			zap.String("error", err.Error()),
+		)
 
 		return
 	}
@@ -59,7 +63,7 @@ func (ep *EventProducer) Produce(message []byte, topic string) {
 			switch ev := e.(type) {
 			case *kafka.Message:
 				if ev.TopicPartition.Error != nil {
-					logrus.Errorf("Failed to deliver message: %+v", ev.TopicPartition)
+					ep.logger.Errorf("Failed to deliver message: %+v", ev.TopicPartition)
 				}
 			}
 		}

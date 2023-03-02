@@ -25,6 +25,7 @@ import (
 type Container struct {
 	ctx         context.Context
 	Conf        *config.Config
+	Logger      log.LoggerInt
 	HttpHandler *router.HttpHandler
 }
 
@@ -38,12 +39,13 @@ func (c *Container) Initialize() {
 	env.NewEnvironment().Initialize()
 	c.Conf = config.NewConfig().Load(os.Getenv("CONFIG_NAME"), os.Getenv("CONFIG_PATH"))
 
-	log.NewLogger(c.Conf).Initialize()
+	c.Logger = log.NewLogger(c.Conf)
+	c.Logger.Initialize()
 
-	db := database.NewDatabase(c.ctx, c.Conf)
+	db := database.NewDatabase(c.ctx, c.Conf, c.Logger)
 	db.Connect()
 
-	eventProd := eventProducer.NewEventProducer(c.Conf)
+	eventProd := eventProducer.NewEventProducer(c.Conf, c.Logger)
 	eventProd.Initialize()
 
 	goValidator := validator.New()
@@ -51,12 +53,12 @@ func (c *Container) Initialize() {
 	muxRouter := mux.NewRouter()
 
 	structValidator := validators.NewStructValidator(goValidator)
-	respBuilder := response.NewResponseBuilder()
+	respBuilder := response.NewResponseBuilder(c.Logger)
 	jsonParser := parser.NewJsonParser(structValidator)
 	urlParParser := parser.NewUrlParamsParser(structValidator)
 
-	compRepo := repository.NewCompanyRepository(db)
-	compService := service.NewCompanyService(compRepo, eventProd)
+	compRepo := repository.NewCompanyRepository(c.Logger, db)
+	compService := service.NewCompanyService(c.Logger, compRepo, eventProd)
 	companyHandler := delivery.NewCompanyHandler(jsonParser, urlParParser, respBuilder, compService)
 
 	c.HttpHandler = router.NewHttpHandler(muxRouter, authMiddleware, companyHandler)

@@ -5,11 +5,11 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 
 	"company-rest-api/internal/company/model"
 	"company-rest-api/internal/core/database"
+	"company-rest-api/internal/core/log"
 )
 
 const companyCollection = "company"
@@ -31,11 +31,13 @@ type CompanyRepositoryInt interface {
 }
 
 type CompanyRepository struct {
+	logger   log.LoggerInt
 	database database.DatabaseInt
 }
 
-func NewCompanyRepository(database database.DatabaseInt) *CompanyRepository {
+func NewCompanyRepository(logger log.LoggerInt, database database.DatabaseInt) *CompanyRepository {
 	return &CompanyRepository{
+		logger:   logger,
 		database: database,
 	}
 }
@@ -69,7 +71,7 @@ func (cr *CompanyRepository) CreateCompany(companyEntity *model.CompanyEntity) (
 func (cr *CompanyRepository) UpdateCompany(companyEntity *model.CompanyEntity) error {
 	marshalledDomainData, err := json.Marshal(&companyEntity)
 	if err != nil {
-		logrus.Errorf("Error while marshalling company update domain data to json: %s", err.Error())
+		cr.logger.Errorf("Error while marshalling company update domain data to json: %s", err.Error())
 
 		return errors.New("internal error")
 	}
@@ -77,7 +79,7 @@ func (cr *CompanyRepository) UpdateCompany(companyEntity *model.CompanyEntity) e
 	companyDoc := CompanyDocument{}
 	err = json.Unmarshal(marshalledDomainData, &companyDoc)
 	if err != nil {
-		logrus.Errorf("Error while unmarshalling company update domain data json to company doc: %s", err.Error())
+		cr.logger.Errorf("Error while unmarshalling company update domain data json to company doc: %s", err.Error())
 
 		return errors.New("internal error")
 	}

@@ -5,17 +5,19 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/sirupsen/logrus"
+	"company-rest-api/internal/core/log"
 )
 
 type Server struct {
 	ctx        context.Context
+	logger     log.LoggerInt
 	HttpServer *http.Server
 }
 
-func NewServer(ctx context.Context, httpServer *http.Server) *Server {
+func NewServer(ctx context.Context, logger log.LoggerInt, httpServer *http.Server) *Server {
 	return &Server{
 		ctx:        ctx,
+		logger:     logger,
 		HttpServer: httpServer,
 	}
 }
@@ -25,12 +27,12 @@ func (srv *Server) Start(wg *sync.WaitGroup) {
 
 	go func() {
 		if err := srv.HttpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logrus.Fatalf("Error from http server: %s", err.Error())
+			srv.logger.Fatalf("Error from http server: %s", err.Error())
 		}
 	}()
 
 	<-srv.ctx.Done()
 	if err := srv.HttpServer.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("Error while closing http server: %s", err.Error())
+		srv.logger.Errorf("Error while closing http server: %s", err.Error())
 	}
 }

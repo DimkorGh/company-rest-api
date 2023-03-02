@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"company-rest-api/internal/company/event_message"
 	"company-rest-api/internal/company/model"
 	"company-rest-api/internal/company/repository"
 	"company-rest-api/internal/core/eventProducer"
+	"company-rest-api/internal/core/log"
 )
 
 type CompanyServiceInt interface {
@@ -20,15 +19,18 @@ type CompanyServiceInt interface {
 }
 
 type CompanyService struct {
+	logger            log.LoggerInt
 	companyRepository repository.CompanyRepositoryInt
 	eventProducer     eventProducer.EventProducerInt
 }
 
 func NewCompanyService(
+	logger log.LoggerInt,
 	companyRepository repository.CompanyRepositoryInt,
 	eventProducer eventProducer.EventProducerInt,
 ) *CompanyService {
 	return &CompanyService{
+		logger:            logger,
 		companyRepository: companyRepository,
 		eventProducer:     eventProducer,
 	}
@@ -39,6 +41,21 @@ func (cr *CompanyService) GetCompany(companyId string) (*repository.CompanyDocum
 	if err != nil {
 		return nil, err
 	}
+
+	message := event_message.CompanyEventMessage{
+		Type:      "get",
+		Uuid:      companyDoc.Id,
+		Timestamp: time.Now().String(),
+	}
+
+	jsonMessage, err := json.Marshal(message)
+	if err != nil {
+		cr.logger.Errorf("Error while marshalling company event message: %s", err.Error())
+
+		return companyDoc, nil
+	}
+
+	go cr.eventProducer.Produce(jsonMessage, "company")
 
 	return companyDoc, nil
 }
@@ -57,7 +74,8 @@ func (cr *CompanyService) CreateCompany(companyEntity *model.CompanyEntity) (str
 
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
-		logrus.Errorf("Error while marshalling company event message: %s", err.Error())
+		cr.logger.Errorf("Error while marshalling company event message: %s", err.Error())
+
 		return companyUuid, nil
 	}
 
@@ -80,7 +98,8 @@ func (cr *CompanyService) UpdateCompany(companyEntity *model.CompanyEntity) erro
 
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
-		logrus.Errorf("Error while marshalling company event message: %s", err.Error())
+		cr.logger.Errorf("Error while marshalling company event message: %s", err.Error())
+
 		return nil
 	}
 
@@ -103,7 +122,8 @@ func (cr *CompanyService) DeleteCompany(companyId string) error {
 
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
-		logrus.Errorf("Error while marshalling company event message: %s", err.Error())
+		cr.logger.Errorf("Error while marshalling company event message: %s", err.Error())
+
 		return nil
 	}
 

@@ -3,7 +3,6 @@ package delivery_test
 import (
 	"context"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,6 +25,7 @@ import (
 	"company-rest-api/internal/core/database"
 	"company-rest-api/internal/core/env"
 	"company-rest-api/internal/core/eventProducer"
+	"company-rest-api/internal/core/log"
 	"company-rest-api/internal/core/router"
 	"company-rest-api/internal/utils/parser"
 	"company-rest-api/internal/utils/response"
@@ -101,10 +101,13 @@ func TestGetCompany(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cnf := initializeTestConfig()
 
-			m := getMigration(cnf)
+			logger := log.NewLogger(cnf)
+			logger.Initialize()
+
+			m := getMigration(cnf, logger)
 			_ = m.Up()
 
-			createTestEndpoint(cnf, tt.args.w, tt.args.r)
+			createTestEndpoint(cnf, logger, tt.args.w, tt.args.r)
 
 			_ = m.Down()
 
@@ -324,11 +327,14 @@ func TestCreateCompany(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cnf := initializeTestConfig()
 
+			logger := log.NewLogger(cnf)
+			logger.Initialize()
+
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri, nil)
 			testReq.Header = tt.args.r.headers
 			testReq.Body = io.NopCloser(strings.NewReader(tt.args.r.body))
 
-			createTestEndpoint(cnf, tt.args.w, testReq)
+			createTestEndpoint(cnf, logger, tt.args.w, testReq)
 
 			assert.Equal(t, tt.expectedStatusCode, tt.args.w.Code)
 			assert.Contains(t, tt.args.w.Body.String(), tt.expectedBody)
@@ -493,14 +499,17 @@ func TestUpdateCompany(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cnf := initializeTestConfig()
 
+			logger := log.NewLogger(cnf)
+			logger.Initialize()
+
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri, nil)
 			testReq.Header = tt.args.r.headers
 			testReq.Body = io.NopCloser(strings.NewReader(tt.args.r.body))
 
-			m := getMigration(cnf)
+			m := getMigration(cnf, logger)
 			_ = m.Up()
 
-			createTestEndpoint(cnf, tt.args.w, testReq)
+			createTestEndpoint(cnf, logger, tt.args.w, testReq)
 
 			_ = m.Down()
 
@@ -590,13 +599,16 @@ func TestDeleteCompany(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cnf := initializeTestConfig()
 
+			logger := log.NewLogger(cnf)
+			logger.Initialize()
+
 			testReq := httptest.NewRequest(tt.args.r.method, companyEndpointUri+tt.args.r.uri, nil)
 			testReq.Header = tt.args.r.headers
 
-			m := getMigration(cnf)
+			m := getMigration(cnf, logger)
 			_ = m.Up()
 
-			createTestEndpoint(cnf, tt.args.w, testReq)
+			createTestEndpoint(cnf, logger, tt.args.w, testReq)
 
 			_ = m.Down()
 
@@ -606,25 +618,25 @@ func TestDeleteCompany(t *testing.T) {
 	}
 }
 
-func createTestEndpoint(cnf *config.Config, w *httptest.ResponseRecorder, r *http.Request) {
+func createTestEndpoint(cnf *config.Config, logger log.LoggerInt, w *httptest.ResponseRecorder, r *http.Request) {
 	muxRouter := mux.NewRouter()
 	authMiddleware := auth.NewAuthenticator(mockSecretKey)
 
-	db := database.NewDatabase(context.Background(), cnf)
+	db := database.NewDatabase(context.Background(), cnf, logger)
 	db.Connect()
 
-	eventProd := eventProducer.NewEventProducer(cnf)
+	eventProd := eventProducer.NewEventProducer(cnf, logger)
 	eventProd.Initialize()
 
 	goValidator := validator.New()
 
 	structValidator := validators.NewStructValidator(goValidator)
-	respBuilder := response.NewResponseBuilder()
+	respBuilder := response.NewResponseBuilder(logger)
 	jsonParser := parser.NewJsonParser(structValidator)
 	urlParParser := parser.NewUrlParamsParser(structValidator)
 
-	compRepo := repository.NewCompanyRepository(db)
-	compService := service.NewCompanyService(compRepo, eventProd)
+	compRepo := repository.NewCompanyRepository(logger, db)
+	compService := service.NewCompanyService(logger, compRepo, eventProd)
 	companyHandler := delivery.NewCompanyHandler(jsonParser, urlParParser, respBuilder, compService)
 
 	testRouter := router.NewHttpHandler(muxRouter, authMiddleware, companyHandler)
@@ -640,7 +652,7 @@ func initializeTestConfig() *config.Config {
 	return config.NewConfig().Load("config", "./../../../config/")
 }
 
-func getMigration(cnf *config.Config) *migrate.Migrate {
+func getMigration(cnf *config.Config, logger log.LoggerInt) *migrate.Migrate {
 	m, err := migrate.New(
 		cnf.Database.MigrationsPath,
 		"mongodb://"+
@@ -651,7 +663,7 @@ func getMigration(cnf *config.Config) *migrate.Migrate {
 			"?authSource=admin",
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatalf("Error while running migrations for integration tests: %s", err.Error())
 	}
 
 	return m

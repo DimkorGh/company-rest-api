@@ -6,7 +6,7 @@ server:
 
 logger:
   Encoding: json
-  Level: 2
+  Level: info
 
 database:
   Address: 172.17.0.1:27017
