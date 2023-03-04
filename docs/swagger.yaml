@@ -1,0 +1,207 @@
+basePath: /
+definitions:
+  delivery.companyResponse:
+    properties:
+      amount:
+        type: integer
+      description:
+        type: string
+      errorMessage:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      registered:
+        type: boolean
+      type:
+        type: string
+    type: object
+  delivery.createCompanyRequest:
+    properties:
+      amount:
+        type: integer
+      description:
+        maxLength: 3000
+        type: string
+      name:
+        maxLength: 15
+        type: string
+      registered:
+        type: boolean
+      type:
+        enum:
+        - Corporations
+        - NonProfit
+        - Cooperative
+        - Sole Proprietorship
+        type: string
+    required:
+    - amount
+    - name
+    - registered
+    - type
+    type: object
+  delivery.updateCompanyRequest:
+    properties:
+      amount:
+        type: integer
+      description:
+        maxLength: 3000
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 15
+        type: string
+      registered:
+        type: boolean
+      type:
+        enum:
+        - Corporations
+        - NonProfit
+        - Cooperative
+        - Sole Proprietorship
+        - ""
+        type: string
+    required:
+    - id
+    type: object
+host: localhost:9092
+info:
+  contact:
+    name: Dimko
+    url: https://github.com/DimkorGh
+  description: A simple REST API for a company entity
+  title: Company REST API
+  version: "1.0"
+paths:
+  /company:
+    delete:
+      consumes:
+      - application/json
+      description: Delete company
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.companyResponse'
+        "400":
+          description: Bad Request - Company Id missing from url params
+        "404":
+          description: Not Found - No company with the specific id found
+        "500":
+          description: Internal Server Error
+      summary: Delete company
+      tags:
+      - Company
+    patch:
+      consumes:
+      - application/json
+      description: Update all company data or specific fields
+      parameters:
+      - description: Company data for update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/delivery.updateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.companyResponse'
+        "400":
+          description: Bad Request - Company input data validation failed, Json parser
+            error
+        "404":
+          description: Not Found - No company with the specific id found
+        "500":
+          description: Internal Server Error
+      summary: Update company
+      tags:
+      - Company
+    post:
+      consumes:
+      - application/json
+      description: Create a company with specific data
+      parameters:
+      - description: Company data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/delivery.createCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.companyResponse'
+        "400":
+          description: Bad Request - Company input data validation failed, Json parser
+            error, company exists
+        "500":
+          description: Internal Server Error
+      summary: Create company
+      tags:
+      - Company
+  /company/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Return all data for a company
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.companyResponse'
+        "400":
+          description: Bad Request - Company Id missing from url params
+        "404":
+          description: Not Found - No company with the specific id found
+        "500":
+          description: Internal Server Error
+      summary: Get company
+      tags:
+      - Company
+  /token:
+    get:
+      consumes:
+      - application/json
+      description: Returns a jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Generate jwt which lasts 5 minutes
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Bearer Token
+    type: apiKey
+swagger: "2.0"

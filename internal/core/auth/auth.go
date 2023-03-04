@@ -20,6 +20,14 @@ func NewAuthenticator(secretKey string) *Authenticator {
 	}
 }
 
+// GenerateToken godoc
+// @Summary Generate jwt which lasts 5 minutes
+// @Description Returns a jwt token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {string} string ""
+// @Router /token [get]
 func (auth *Authenticator) GenerateToken(w http.ResponseWriter, _ *http.Request) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true

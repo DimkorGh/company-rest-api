@@ -38,6 +38,18 @@ func NewCompanyHandler(
 	}
 }
 
+// GetCompany godoc
+// @Summary Get company
+// @Description Return all data for a company
+// @Tags Company
+// @Accept json
+// @Produce json
+// @Param   id  path     string true "Company ID"
+// @Success 200 {object} delivery.companyResponse
+// @Failure 400 "Bad Request - Company Id missing from url params"
+// @Failure 404 "Not Found - No company with the specific id found"
+// @Failure 500 "Internal Server Error"
+// @Router /company/{id} [get]
 func (ch *CompanyHandler) GetCompany(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
@@ -65,6 +77,17 @@ func (ch *CompanyHandler) GetCompany(w http.ResponseWriter, r *http.Request) {
 	res = ch.adaptToGetCompanyResponse(companyDoc)
 }
 
+// CreateCompany godoc
+// @Summary Create company
+// @Description Create a company with specific data
+// @Tags Company
+// @Accept json
+// @Produce json
+// @Param request body delivery.createCompanyRequest true "Company data"
+// @Success 200 {object} delivery.companyResponse
+// @Failure 400 "Bad Request - Company input data validation failed, Json parser error, company exists"
+// @Failure 500 "Internal Server Error"
+// @Router /company [post]
 func (ch *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
@@ -94,6 +117,18 @@ func (ch *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) 
 	res.Id = companyId
 }
 
+// UpdateCompany godoc
+// @Summary Update company
+// @Description Update all company data or specific fields
+// @Tags Company
+// @Accept json
+// @Produce json
+// @Param request body delivery.updateCompanyRequest true "Company data for update"
+// @Success 200 {object} delivery.companyResponse
+// @Failure 400 "Bad Request - Company input data validation failed, Json parser error"
+// @Failure 404 "Not Found - No company with the specific id found"
+// @Failure 500 "Internal Server Error"
+// @Router /company [patch]
 func (ch *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
@@ -118,6 +153,18 @@ func (ch *CompanyHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) 
 	err = ch.companyService.UpdateCompany(domainData)
 }
 
+// DeleteCompany godoc
+// @Summary Delete company
+// @Description Delete company
+// @Tags Company
+// @Accept json
+// @Produce json
+// @Param   id  path     string true "Company ID"
+// @Success 200 {object} delivery.companyResponse
+// @Failure 400 "Bad Request - Company Id missing from url params"
+// @Failure 404 "Not Found - No company with the specific id found"
+// @Failure 500 "Internal Server Error"
+// @Router /company [delete]
 func (ch *CompanyHandler) DeleteCompany(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
