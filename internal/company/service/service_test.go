@@ -69,8 +69,9 @@ func TestGetCompany(t *testing.T) {
 					Return(tt.want, nil)
 			}
 			eventProducerMock := mocks.NewMockEventProducerInt(ctrl)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
-			companyService := service.NewCompanyService(companyRepository, eventProducerMock)
+			companyService := service.NewCompanyService(logger, companyRepository, eventProducerMock)
 			result, err := companyService.GetCompany(tt.args.companyId)
 
 			assert.Equal(t, tt.want, result)
@@ -125,10 +126,10 @@ func TestCreateCompany(t *testing.T) {
 					CreateCompany(gomock.Any()).
 					Return("466b525d-128d-4a52-83ae-8966fc9e6b1d", nil)
 			}
-
 			eventProducerMock := mocks.NewMockEventProducerInt(ctrl)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
-			companyService := service.NewCompanyService(companyRepository, eventProducerMock)
+			companyService := service.NewCompanyService(logger, companyRepository, eventProducerMock)
 			result, err := companyService.CreateCompany(tt.args.clientRequest)
 
 			assert.Equal(t, tt.wantErr, err != nil)
@@ -193,8 +194,9 @@ func TestUpdateCompany(t *testing.T) {
 					Return(nil)
 			}
 			eventProducerMock := mocks.NewMockEventProducerInt(ctrl)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
-			companyService := service.NewCompanyService(companyRepository, eventProducerMock)
+			companyService := service.NewCompanyService(logger, companyRepository, eventProducerMock)
 			err := companyService.UpdateCompany(tt.args.domainData)
 
 			assert.Equal(t, tt.wantErr, err != nil)
@@ -245,10 +247,10 @@ func TestDeleteCompany(t *testing.T) {
 					DeleteCompany(gomock.Any()).
 					Return(nil)
 			}
-
 			eventProducerMock := mocks.NewMockEventProducerInt(ctrl)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
-			companyService := service.NewCompanyService(companyRepository, eventProducerMock)
+			companyService := service.NewCompanyService(logger, companyRepository, eventProducerMock)
 			err := companyService.DeleteCompany(tt.args.companyId)
 
 			assert.Equal(t, tt.wantErr, err != nil)

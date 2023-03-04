@@ -17,8 +17,9 @@ func TestNewCompanyRepository(t *testing.T) {
 	t.Run("constructor return new struct", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		db := mocks.NewMockDatabaseInt(ctrl)
+		logger := mocks.NewMockLoggerInt(ctrl)
 
-		result := repository.NewCompanyRepository(db)
+		result := repository.NewCompanyRepository(logger, db)
 
 		assert.Implements(t, new(repository.CompanyRepositoryInt), result)
 	})
@@ -63,6 +64,7 @@ func TestAddCompany(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
 			db := mocks.NewMockDatabaseInt(ctrl)
 			if tt.wantErr {
@@ -77,7 +79,7 @@ func TestAddCompany(t *testing.T) {
 					Return(nil)
 			}
 
-			companyRepo := repository.NewCompanyRepository(db)
+			companyRepo := repository.NewCompanyRepository(logger, db)
 			result, err := companyRepo.CreateCompany(tt.args.companyEntity)
 
 			if tt.wantErr {
@@ -129,6 +131,7 @@ func TestGetCompany(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
 			db := mocks.NewMockDatabaseInt(ctrl)
 			if tt.wantErr {
@@ -143,7 +146,7 @@ func TestGetCompany(t *testing.T) {
 					Return(nil)
 			}
 
-			companyRepo := repository.NewCompanyRepository(db)
+			companyRepo := repository.NewCompanyRepository(logger, db)
 
 			result, err := companyRepo.GetCompany(tt.args.companyId)
 
@@ -180,6 +183,7 @@ func TestUpdateCompany(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
 			db := mocks.NewMockDatabaseInt(ctrl)
 			if tt.wantErr {
@@ -194,7 +198,7 @@ func TestUpdateCompany(t *testing.T) {
 					Return(nil)
 			}
 
-			companyRepo := repository.NewCompanyRepository(db)
+			companyRepo := repository.NewCompanyRepository(logger, db)
 
 			err := companyRepo.UpdateCompany(tt.args.companyEntity)
 
@@ -230,6 +234,7 @@ func TestDeleteCompany(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			logger := mocks.NewMockLoggerInt(ctrl)
 
 			db := mocks.NewMockDatabaseInt(ctrl)
 			if tt.wantErr {
@@ -244,7 +249,7 @@ func TestDeleteCompany(t *testing.T) {
 					Return(nil)
 			}
 
-			companyRepo := repository.NewCompanyRepository(db)
+			companyRepo := repository.NewCompanyRepository(logger, db)
 
 			err := companyRepo.DeleteCompany(tt.args.companyId)
 
