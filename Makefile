@@ -60,6 +60,14 @@ docker.mock.generate:
 			--workdir /app \
 			api-build mockgen -source="$(FILE)"
 
+docker.swagger.generate:
+	make dockerBuild
+	@docker run \
+			--rm \
+			--volume "$(PWD)":/app \
+			--workdir /app \
+			api-build swag init -g /cmd/main/main.go
+
 # -------- DOCKER BUILDS -------
 
 dockerBuild:

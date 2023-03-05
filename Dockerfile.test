@@ -11,6 +11,7 @@ RUN go mod download
 RUN go install github.com/golang/mock/mockgen@v1.6.0
 RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
 RUN go get gopkg.in/confluentinc/confluent-kafka-go.v1/kafka
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY . .
 
