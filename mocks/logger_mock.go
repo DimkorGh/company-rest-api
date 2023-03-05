@@ -33,9 +33,8 @@ func (m *MockLoggerInt) EXPECT() *MockLoggerIntMockRecorder {
 func (m *MockLoggerInt) Debug(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Debug", varargs...)
 }
 
@@ -49,9 +48,8 @@ func (mr *MockLoggerIntMockRecorder) Debug(args ...interface{}) *gomock.Call {
 func (m *MockLoggerInt) Debugf(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Debugf", varargs...)
 }
 
@@ -66,9 +64,8 @@ func (mr *MockLoggerIntMockRecorder) Debugf(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Debugw(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Debugw", varargs...)
 }
 
@@ -83,9 +80,8 @@ func (mr *MockLoggerIntMockRecorder) Debugw(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Error(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Error", varargs...)
 }
 
@@ -99,9 +95,8 @@ func (mr *MockLoggerIntMockRecorder) Error(args ...interface{}) *gomock.Call {
 func (m *MockLoggerInt) Errorf(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Errorf", varargs...)
 }
 
@@ -116,9 +111,8 @@ func (mr *MockLoggerIntMockRecorder) Errorf(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Errorw(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Errorw", varargs...)
 }
 
@@ -133,9 +127,8 @@ func (mr *MockLoggerIntMockRecorder) Errorw(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Fatal(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Fatal", varargs...)
 }
 
@@ -149,9 +142,8 @@ func (mr *MockLoggerIntMockRecorder) Fatal(args ...interface{}) *gomock.Call {
 func (m *MockLoggerInt) Fatalf(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Fatalf", varargs...)
 }
 
@@ -166,9 +158,8 @@ func (mr *MockLoggerIntMockRecorder) Fatalf(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Fatalw(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Fatalw", varargs...)
 }
 
@@ -183,9 +174,8 @@ func (mr *MockLoggerIntMockRecorder) Fatalw(msg interface{}, args ...interface{}
 func (m *MockLoggerInt) Info(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Info", varargs...)
 }
 
@@ -199,9 +189,8 @@ func (mr *MockLoggerIntMockRecorder) Info(args ...interface{}) *gomock.Call {
 func (m *MockLoggerInt) Infof(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Infof", varargs...)
 }
 
@@ -216,9 +205,8 @@ func (mr *MockLoggerIntMockRecorder) Infof(msg interface{}, args ...interface{})
 func (m *MockLoggerInt) Infow(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Infow", varargs...)
 }
 
@@ -245,9 +233,8 @@ func (mr *MockLoggerIntMockRecorder) Initialize() *gomock.Call {
 func (m *MockLoggerInt) Warn(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Warn", varargs...)
 }
 
@@ -261,9 +248,8 @@ func (mr *MockLoggerIntMockRecorder) Warn(args ...interface{}) *gomock.Call {
 func (m *MockLoggerInt) Warnf(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Warnf", varargs...)
 }
 
@@ -278,9 +264,8 @@ func (mr *MockLoggerIntMockRecorder) Warnf(msg interface{}, args ...interface{})
 func (m *MockLoggerInt) Warnw(msg string, args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{msg}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
+	varargs = append(varargs, args...)
+
 	m.ctrl.Call(m, "Warnw", varargs...)
 }
 
