@@ -1,6 +1,37 @@
-Company Rest API
+# Company RESTful API
 
-##### Makefile Commands
+This repo includes a RESTful API microservice, written in golang, in order to expose simple CRUD operations for a company entity.
+
+### Makefile Commands
+
+he project provides the following features:
+
+- RESTful endpoints
+- CRUD operations
+- JWT-based authentication
+- Data validation
+- Unit tests
+- Integration tests
+- Swagger api documentation
+- Postman collection and environment
+- Git Actions for linting and unit tests
+- Multi-Stage Dockerfile
+
+The project uses the following Go packages:
+
+- Routing: **[gorilla-mux](https://github.com/gorilla/mux)**
+- Logging: **[zap](https://github.com/uber-go/zap)**
+- Database: **[mongo](https://github.com/mongodb/mongo-go-driver)**
+- Event Producing: **[confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go)**
+- Configuration: **[viper](https://github.com/spf13/viper)** 
+- Env: **[godotenv](https://github.com/joho/godotenv)**
+- Migration: **[golang-migrate](https://github.com/golang-migrate/migrate)**
+- Validation: **[go-playground](https://github.com/go-playground/validator)**
+- Jwt: **[jwt-go](https://github.com/dgrijalva/jwt-go)**
+- Mocking **[go-mock](https://github.com/golang/mock)**
+- Assertions **[testify](https://github.com/stretchr/testify)**
+
+### Makefile Commands
 
 | Command                               | Usage                                                      |
 |---------------------------------------|------------------------------------------------------------|
@@ -11,31 +42,14 @@ Company Rest API
 | docker.test.all                       | `Run both unit and integration tests via docker`           |
 | docker.test.all.coverage.withView     | `Run both unit and integration tests via docker with view` |
 | docker.mock.generate FILE={FILE_PATH} | `Generate mock for a specific file via docker`             |
+| docker.swagger.generate               | `Generate swagger yaml and json files`                     |
 
-<br>
 
 * In order to execute makefile commands type **make** plus a command from the table above
 
   make {command}
 
 ---
-
-### Testing app endpoints via Postman
-
-* Import *postmanData/collection/4dcdf0e0-52bc-40de-ad10-34bda41a2ade.json* and
-  *postmanData/environment/c14aa92a-3df3-40c5-8937-da4e9e6b0164.json* files into postman as you can see below
-
-![import.png](postmanData%2Fscreenshots%2Fimport.png)
-
-* After import postman collection should look like this
-
-![collections.png](postmanData%2Fscreenshots%2Fcollections.png)
-
-* API uses jwt authentication. You can add authorization bearer token to postman requests as you can see below 
-
-![auth.png](postmanData%2Fscreenshots%2Fauth.png)
-
-* **GET /token** endpoint returns an authorization token which lasts 5 minutes. When you execute this call, the specific postman collection parses the token and **adds it automatically** to the headers of all the other requests.
 
 ### Notes
 
