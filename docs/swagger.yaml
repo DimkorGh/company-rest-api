@@ -70,7 +70,7 @@ definitions:
 host: localhost:9092
 info:
   contact:
-    name: Dimko
+    name: Dimkor
     url: https://github.com/DimkorGh
   description: A simple REST API for a company entity
   title: Company REST API
