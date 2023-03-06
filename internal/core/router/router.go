@@ -1,10 +1,14 @@
 package router
 
 import (
-	"github.com/gorilla/mux"
-
 	"company-rest-api/internal/company/delivery"
 	"company-rest-api/internal/core/auth"
+	"net/http"
+
+	_ "company-rest-api/docs"
+
+	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type HttpHandler struct {
@@ -28,8 +32,10 @@ func NewHttpHandler(
 func (h *HttpHandler) InitializeRouter() {
 	h.Router.HandleFunc("/token", h.auth.GenerateToken).Methods("GET")
 
-	h.Router.HandleFunc("/company", h.compHandler.GetCompany).Methods("GET")
-	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.CreateCompany)).Methods("POST")
-	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.UpdateCompany)).Methods("PATCH")
-	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.DeleteCompany)).Methods("DELETE")
+	h.Router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	h.Router.HandleFunc("/company", h.compHandler.GetCompany).Methods(http.MethodGet)
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.CreateCompany)).Methods(http.MethodPost)
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.UpdateCompany)).Methods(http.MethodPatch)
+	h.Router.HandleFunc("/company", h.auth.Authenticate(h.compHandler.DeleteCompany)).Methods(http.MethodDelete)
 }
