@@ -1,10 +1,9 @@
 # Company RESTful API
 
-This repo includes a RESTful API microservice, written in golang, in order to expose simple CRUD operations for a company entity.
+This repo includes a RESTful API microservice, written in golang, in order to expose simple CRUD operations for a
+company entity.
 
-### Makefile Commands
-
-he project provides the following features:
+#### The project provides the following features:
 
 - RESTful endpoints
 - CRUD operations
@@ -17,13 +16,13 @@ he project provides the following features:
 - Git Actions for linting and unit tests
 - Multi-Stage Dockerfile
 
-The project uses the following Go packages:
+#### The project uses the following Go packages:
 
 - Routing: **[gorilla-mux](https://github.com/gorilla/mux)**
 - Logging: **[zap](https://github.com/uber-go/zap)**
 - Database: **[mongo](https://github.com/mongodb/mongo-go-driver)**
 - Event Producing: **[confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go)**
-- Configuration: **[viper](https://github.com/spf13/viper)** 
+- Configuration: **[viper](https://github.com/spf13/viper)**
 - Env: **[godotenv](https://github.com/joho/godotenv)**
 - Migration: **[golang-migrate](https://github.com/golang-migrate/migrate)**
 - Validation: **[go-playground](https://github.com/go-playground/validator)**
@@ -38,12 +37,12 @@ The project uses the following Go packages:
 | docker.app.start                      | `Start all services`                                       |
 | docker.format                         | `Reformats go source code via docker`                      |
 | docker.linter.run                     | `Run linter`                                               |
+| docker.linter.fields.align            | `Fix struct fields padding to reduce memory allocation`    |
 | docker.test.unit                      | `Run unit tests via docker`                                |
 | docker.test.all                       | `Run both unit and integration tests via docker`           |
 | docker.test.all.coverage.withView     | `Run both unit and integration tests via docker with view` |
 | docker.mock.generate FILE={FILE_PATH} | `Generate mock for a specific file via docker`             |
 | docker.swagger.generate               | `Generate swagger yaml and json files`                     |
-
 
 * In order to execute makefile commands type **make** plus a command from the table above
 

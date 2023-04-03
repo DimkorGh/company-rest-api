@@ -18,11 +18,19 @@ docker.format:
 
 docker.linter.run:
 	make dockerBuild
-		@docker run \
-				--rm \
-				--volume "$(PWD)":/app \
-				--workdir /app \
-				api-build golangci-lint run
+	@docker run \
+			--rm \
+			--volume "$(PWD)":/app \
+			--workdir /app \
+			api-build golangci-lint run
+
+docker.linter.fields.align:
+	make dockerBuild
+	@docker run \
+			--rm \
+			--volume "$(PWD)":/app \
+			--workdir /app \
+			api-build fieldalignment -fix "$(FOLDER)"
 
 # -------- TESTS COMMANDS ------------
 
